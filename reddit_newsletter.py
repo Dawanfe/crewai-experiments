@@ -229,22 +229,30 @@ result = crew.kickoff()
 print("######################")
 print(result)
 
-# 将输出保存到文件
+# 将输出保存到文件（按 年/月 目录，文件名为 年月日.md）
 try:
-    output_dir = os.path.join(os.getcwd(), "output")
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir, exist_ok=True)
+    # 目标目录：doc/YYYY/MM
+    year_str = time.strftime("%Y", time.localtime())
+    month_str = time.strftime("%m", time.localtime())
+    date_str = time.strftime("%Y%m%d", time.localtime())
 
-    # 写入 Markdown 结果
-    newsletter_path = os.path.join(output_dir, "newsletter.md")
+    doc_dir = os.path.join(os.getcwd(), "doc", year_str, month_str)
+    os.makedirs(doc_dir, exist_ok=True)
+
+    # 文件名：YYYYMMDD.md
+    newsletter_path = os.path.join(doc_dir, f"{date_str}.md")
     with open(newsletter_path, "w", encoding="utf-8") as f_md:
         f_md.write(str(result))
 
-    # 记录运行日志
+    # 仍保留原有的运行日志到 output/run.log（若存在则追加，不存在则创建）
+    output_dir = os.path.join(os.getcwd(), "output")
+    os.makedirs(output_dir, exist_ok=True)
     log_path = os.path.join(output_dir, "run.log")
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     with open(log_path, "a", encoding="utf-8") as f_log:
-        f_log.write(f"[{timestamp}] RUN COMPLETED: wrote newsletter.md (length={len(str(result))})\n")
+        f_log.write(
+            f"[{timestamp}] RUN COMPLETED: wrote {newsletter_path} (length={len(str(result))})\n"
+        )
     print(f"[INFO] 输出已保存到: {newsletter_path}，运行日志: {log_path}")
 except Exception as e:
     print(f"[ERROR] 保存输出失败: {e}")
